@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafío de Métodos Numéricos | Estrella Condori</title>
+<style>
+:root{--navy:#14243a;--blue:#2563eb;--cyan:#0891b2;--bg:#f3f6fb;--card:#fff;--text:#1e293b;--muted:#64748b;--line:#dce4ef;--green:#15803d;--red:#b91c1c;--shadow:0 8px 24px rgba(15,35,65,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(120deg,#14243a,#1e4775);color:white;padding:25px 30px}
+header h1{margin:0 0 7px;font-size:clamp(21px,3vw,30px)}header p{margin:0;color:#dbeafe}
+.layout{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:calc(100vh - 105px)}
+aside{background:#17283f;padding:18px 12px;color:white}
+aside .student{padding:12px;margin-bottom:15px;border-bottom:1px solid #38506d;color:#dbeafe;font-size:13px}
+nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#d7e3f3;padding:12px 13px;border-radius:8px;margin:3px 0;cursor:pointer;font-size:14px}
+nav button:hover,nav button.active{background:#294766;color:white}
+main{padding:28px;max-width:1250px;width:100%;margin:auto}
+h2{margin:0 0 12px;font-size:25px}h3{margin:20px 0 10px}p{line-height:1.6}.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;margin:15px 0;box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.stat{padding:18px;border-radius:12px;background:#eef5ff;border:1px solid #d8e7ff}.stat strong{display:block;font-size:25px;color:#174b88;margin-top:7px}
+button.primary,.btn{background:var(--blue);color:white;border:0;padding:11px 16px;border-radius:8px;cursor:pointer;font-weight:600}
+button.secondary{background:#e8eef7;color:#20344f;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+button:hover{filter:brightness(.96)}label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:7px;background:white;color:var(--text);font:inherit}
+textarea{min-height:115px;font-family:Consolas,monospace;font-size:13px}
+.row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.row>div{flex:1;min-width:170px}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:14px}th,td{border:1px solid var(--line);padding:9px;text-align:center}th{background:#edf3fa}
+.tablewrap{overflow-x:auto}.pill{display:inline-block;padding:5px 9px;border-radius:30px;background:#e8f1ff;color:#1d4ed8;font-size:12px;font-weight:700}
+.good{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}.notice{padding:12px;border-radius:8px;background:#eff6ff;border-left:4px solid var(--blue);line-height:1.5}
+.error{padding:12px;background:#fef2f2;color:var(--red);border-radius:8px}.success{padding:12px;background:#f0fdf4;color:var(--green);border-radius:8px}
+.matrix{font-family:Consolas,monospace;white-space:pre-wrap;background:#f8fafc;padding:13px;border-radius:8px;overflow:auto}
+footer{text-align:center;color:var(--muted);padding:20px;font-size:12px}
+canvas{width:100%;height:290px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.small{font-size:12px}.hidden{display:none}
+@media(max-width:760px){.layout{grid-template-columns:1fr}aside{padding:10px}nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}nav button{font-size:12px;padding:9px}main{padding:16px}header{padding:20px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Desafío de Métodos Numéricos</h1>
+  <p>Ingeniería de Sistemas · Multiservicios Andina S.R.L. · Aplicación académica</p>
+</header>
+<div class="layout">
+<aside>
+  <div class="student"><strong>Estudiante</strong><br>Keyla Estrella Huanca Condori<br><span class="small">Proyecto Financiero</span></div>
+  <nav id="nav">
+    <button class="active" data-page="inicio">⌂ Inicio</button>
+    <button data-page="empresa">▤ Caso de estudio</button>
+    <button data-page="modelo">∑ Formulación matemática</button>
+    <button data-page="datos">⚙ Entrada de datos</button>
+    <button data-page="escenarios">▦ Escenarios</button>
+    <button data-page="gauss">✓ Solución de Gauss</button>
+    <button data-page="gc">↗ Gradientes Conjugados</button>
+    <button data-page="gcp">⇧ Gradientes Precondicionados</button>
+    <button data-page="comparacion">⇄ Comparación</button>
+    <button data-page="errores">％ Análisis de errores</button>
+    <button data-page="qa">☑ Pruebas QA</button>
+    <button data-page="conclusiones">★ Conclusiones</button>
+  </nav>
+</aside>
+<main id="app"></main>
+</div>
+<footer>Multiservicios Andina S.R.L. · Datos simulados con fines académicos · HTML, CSS y JavaScript en un solo archivo</footer>
+<script>
+"use strict";
+
+/* ==========================================================
+   DATOS DE LOS TRES ESCENARIOS
+   El modelo representa cuatro áreas de asignación de recursos.
+   ========================================================== */
+const ESCENARIOS = {
+ ideal:{
+  nombre:"Escenario ideal",
+  descripcion:"Condiciones financieras estables y distribución planificada de recursos.",
+  A:[[8,-1,0,0],[-1,7,-1,0],[0,-1,6,-1],[0,0,-1,5]],
+  b:[800,400,300,200]
+ },
+ estres:{
+  nombre:"Bajo estrés financiero",
+  descripcion:"La empresa enfrenta mayores compromisos y presión sobre sus recursos.",
+  A:[[8,-1,0,0],[-1,7,-1,0],[0,-1,6,-1],[0,0,-1,5]],
+  b:[920,460,330,230]
+ },
+ malCondicionado:{
+  nombre:"Escenario mal condicionado",
+  descripcion:"Sistema con escalas diagonales muy diferentes para estudiar el efecto del condicionamiento.",
+  A:[[3,-10,0,0],[-10,300,-1000,0],[0,-1000,30000,-100000],[0,0,-100000,3000000]],
+  b:[200,1000,10000,200000]
+ }
+};
+let actual="ideal";
+let ultimo={gauss:null,gc:null,gcp:null};
+const nombres=["Operaciones","Tecnología","Comercial","Administración"];
+const $=id=>document.getElementById(id);
+const copia=A=>A.map(f=>[...f]);
+const punto=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);
+const norma=v=>Math.sqrt(punto(v,v));
+const suma=(a,b)=>a.map((v,i)=>v+b[i]);
+const resta=(a,b)=>a.map((v,i)=>v-b[i]);
+const escalar=(a,k)=>a.map(v=>v*k);
+const matvec=(A,x)=>A.map(f=>punto(f,x));
+const fmt=n=>Number(n).toLocaleString("es-BO",{maximumFractionDigits:8});
+const exp=n=>Number(n).toExponential(4);
+function residuo(A,x,b){return resta(b,matvec(A,x))}
+function relativo(A,x,b){const r=norma(residuo(A,x,b));return r/(norma(b)||1)}
+
+/* Gauss con pivoteo parcial */
+function resolverGauss(A,b){
+ const n=A.length,M=A.map((f,i)=>[...f,b[i]]);
+ const escala=Math.max(...A.flat().map(Math.abs));
+ for(let k=0;k<n;k++){
+  let p=k;
+  for(let i=k+1;i<n;i++)if(Math.abs(M[i][k])>Math.abs(M[p][k]))p=i;
+  if(Math.abs(M[p][k])<1e-14*escala)throw Error("La matriz es singular o casi singular.");
+  [M[k],M[p]]=[M[p],M[k]];
+  for(let i=k+1;i<n;i++){
+   const q=M[i][k]/M[k][k];
+   for(let j=k;j<=n;j++)M[i][j]-=q*M[k][j];
+   M[i][k]=0;
+  }
+ }
+ const x=Array(n).fill(0);
+ for(let i=n-1;i>=0;i--){
+  let s=M[i][n];for(let j=i+1;j<n;j++)s-=M[i][j]*x[j];
+  x[i]=s/M[i][i];
+ }
+ return {solucion:x,residuo:norma(residuo(A,x,b)),residuoRelativo:relativo(A,x,b)};
+}
+
+/* Comprobar simetría y definida positividad mediante Cholesky */
+function validarSPD(A){
+ const n=A.length,esc=Math.max(1,...A.flat().map(Math.abs)),tol=1e-12*esc;
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)
+  if(Math.abs(A[i][j]-A[j][i])>tol)throw Error("GC/GCP requieren una matriz simétrica.");
+ const L=Array.from({length:n},()=>Array(n).fill(0));
+ for(let i=0;i<n;i++)for(let j=0;j<=i;j++){
+  let s=A[i][j];for(let k=0;k<j;k++)s-=L[i][k]*L[j][k];
+  if(i===j){if(s<=tol)throw Error("La matriz no es definida positiva.");L[i][j]=Math.sqrt(s);}
+  else L[i][j]=s/L[j][j];
+ }
+}
+function validarEntradas(A,b){
+ const n=A.length;
+ if(!n||A.some(f=>f.length!==n)||b.length!==n)throw Error("Dimensiones incompatibles.");
+ if(!A.flat().every(Number.isFinite)||!b.every(Number.isFinite))throw Error("Todos los coeficientes deben ser números finitos.");
+}
+
+/* Gradientes Conjugados (GC) */
+function resolverGC(A,b,{tol=1e-6,max=1000,x0=null}={}){
+ validarEntradas(A,b);validarSPD(A);
+ const n=b.length;let x=x0?[...x0]:Array(n).fill(0);
+ let r=resta(b,matvec(A,x)),p=[...r],rr=punto(r,r);
+ const nb=norma(b)||1,hist=[{k:0,r:Math.sqrt(rr),rel:Math.sqrt(rr)/nb}];
+ if(Math.sqrt(rr)/nb<tol)return {solucion:x,iteraciones:0,convergio:true,historial:hist,residuo:Math.sqrt(rr),residuoRelativo:Math.sqrt(rr)/nb};
+ for(let k=0;k<max;k++){
+  const Ap=matvec(A,p),den=punto(p,Ap);
+  if(!(den>0))throw Error("Curvatura no positiva durante GC.");
+  const alpha=rr/den;x=suma(x,escalar(p,alpha));
+  const rn=resta(r,escalar(Ap,alpha)),rrn=punto(rn,rn),nr=Math.sqrt(rrn),rel=nr/nb;
+  hist.push({k:k+1,r:nr,rel});
+  if(rel<tol)return {solucion:x,iteraciones:k+1,convergio:true,historial:hist,residuo:nr,residuoRelativo:rel};
+  const beta=rrn/rr;p=suma(rn,escalar(p,beta));r=rn;rr=rrn;
+ }
+ return {solucion:x,iteraciones:max,convergio:false,historial:hist,residuo:norma(r),residuoRelativo:norma(r)/nb};
+}
+
+/* Gradientes Conjugados Precondicionado (GCP), Jacobi: M = diag(A) */
+function resolverGCP(A,b,{tol=1e-6,max=1000,x0=null}={}){
+ validarEntradas(A,b);validarSPD(A);
+ const n=b.length,d=A.map((f,i)=>f[i]);
+ if(d.some(v=>!(v>0)))throw Error("Jacobi necesita una diagonal positiva.");
+ const aplicarMInv=r=>r.map((v,i)=>v/d[i]);
+ let x=x0?[...x0]:Array(n).fill(0);
+ let r=resta(b,matvec(A,x)),z=aplicarMInv(r),p=[...z],rho=punto(r,z);
+ const nb=norma(b)||1,nr=norma(r),hist=[{k:0,r:nr,rel:nr/nb}];
+ if(nr/nb<tol)return {solucion:x,iteraciones:0,convergio:true,historial:hist,residuo:nr,residuoRelativo:nr/nb,precondicionador:"Jacobi"};
+ for(let k=0;k<max;k++){
+  const Ap=matvec(A,p),den=punto(p,Ap);
+  if(!(den>0)||!(rho>0))throw Error("Curvatura no positiva durante GCP.");
+  const alpha=rho/den;x=suma(x,escalar(p,alpha));
+  const rn=resta(r,escalar(Ap,alpha)),nrm=norma(rn),rel=nrm/nb;
+  hist.push({k:k+1,r:nrm,rel});
+  if(rel<tol)return {solucion:x,iteraciones:k+1,convergio:true,historial:hist,residuo:nrm,residuoRelativo:rel,precondicionador:"Jacobi"};
+  const zn=aplicarMInv(rn),rhon=punto(rn,zn),beta=rhon/rho;
+  p=suma(zn,escalar(p,beta));r=rn;z=zn;rho=rhon;
+ }
+ return {solucion:x,iteraciones:max,convergio:false,historial:hist,residuo:norma(r),residuoRelativo:norma(r)/nb,precondicionador:"Jacobi"};
+}
+
+/* Número de condición aproximado para matrices simétricas: Jacobi eigenvalue */
+function condicion(A){
+ const B=copia(A),n=B.length;
+ for(let it=0;it<100*n*n;it++){
+  let p=0,q=1,max=0;
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(Math.abs(B[i][j])>max){max=Math.abs(B[i][j]);p=i;q=j;}
+  if(max<1e-12)break;
+  const phi=.5*Math.atan2(2*B[p][q],B[q][q]-B[p][p]),c=Math.cos(phi),s=Math.sin(phi);
+  const app=c*c*B[p][p]-2*s*c*B[p][q]+s*s*B[q][q];
+  const aqq=s*s*B[p][p]+2*s*c*B[p][q]+c*c*B[q][q];
+  for(let k=0;k<n;k++)if(k!==p&&k!==q){
+   const bkp=B[k][p],bkq=B[k][q];B[k][p]=B[p][k]=c*bkp-s*bkq;B[k][q]=B[q][k]=s*bkp+c*bkq;
+  }
+  B[p][p]=app;B[q][q]=aqq;B[p][q]=B[q][p]=0;
+ }
+ const ev=B.map((r,i)=>r[i]),abs=ev.map(Math.abs);
+ return Math.max(...abs)/Math.min(...abs);
+}
+function escenarioActual(){return ESCENARIOS[actual]}
+function tablaSolucion(sol){
+ return `<div class="tablewrap"><table><thead><tr><th>Variable</th><th>Valor calculado</th></tr></thead><tbody>${sol.map((v,i)=>`<tr><td>${nombres[i]||"x"+(i+1)}</td><td>${fmt(v)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function opcionesHTML(){return Object.entries(ESCENARIOS).map(([k,v])=>`<option value="${k}" ${k===actual?"selected":""}>${v.nombre}</option>`).join("")}
+function selector(){return `<label>Escenario financiero</label><select id="scenarioSelect">${opcionesHTML()}</select>`}
+function actualizarSelector(){const s=$("scenarioSelect");if(s)s.addEventListener("change",e=>{actual=e.target.value;render()})}
+function render(){
+ const page=document.querySelector("nav button.active")?.dataset.page||"inicio";
+ const A=escenarioActual().A,b=escenarioActual().b;
+ const app=$("app");
+ const header=(title,desc)=>`<h2>${title}</h2><p class="muted">${desc}</p>`;
+ if(page==="inicio")app.innerHTML=`
+ ${header("Panel principal","Sistema académico de análisis y solución de sistemas lineales.")}
+ <div class="grid">
+  <div class="stat">Escenarios<strong>03</strong></div><div class="stat">Variables<strong>04</strong></div><div class="stat">Métodos numéricos<strong>03</strong></div><div class="stat">Tolerancia base<strong>10⁻⁶</strong></div>
+ </div>
+ <div class="card"><h3>Bienvenida, Estrella</h3><p>Esta aplicación estudia la distribución de recursos de <b>Multiservicios Andina S.R.L.</b>, una empresa ficticia. Se comparan Gauss, Gradientes Conjugados (GC) y Gradientes Conjugados Precondicionado (GCP) en tres escenarios financieros.</p><div class="notice">Objetivo: resolver sistemas lineales Ax = b, analizar el residuo, estudiar el condicionamiento y comparar la convergencia de los métodos.</div></div>
+ <div class="card"><h3>Ruta de trabajo</h3><ol><li>Definir el modelo matemático.</li><li>Seleccionar o modificar los escenarios.</li><li>Calcular la solución de referencia con Gauss.</li><li>Resolver mediante GC y GCP.</li><li>Comparar errores, residuos e iteraciones.</li><li>Documentar pruebas y conclusiones.</li></ol></div>`;
+ if(page==="empresa")app.innerHTML=`
+ ${header("Caso de estudio","Contexto organizacional del problema.")}
+ <div class="card"><h3>Multiservicios Andina S.R.L.</h3><p>Empresa ficticia dedicada a prestar servicios tecnológicos y administrativos. Para planificar sus recursos, la gerencia necesita estimar la asignación entre cuatro áreas.</p><div class="grid">${nombres.map((n,i)=>`<div class="stat">Área ${i+1}<strong style="font-size:17px">${n}</strong></div>`).join("")}</div><p><b>Supuesto académico:</b> los coeficientes y recursos son simulados. Las variables representan niveles de asignación o unidades equivalentes del modelo, no estados financieros reales.</p></div>`;
+ if(page==="modelo")app.innerHTML=`
+ ${header("Formulación matemática","Representación del problema mediante un sistema lineal.")}
+ <div class="card"><h3>Modelo general</h3><p>Se representa el problema mediante:</p><div class="matrix">A · x = b</div><p><b>A:</b> matriz de coeficientes. <b>x:</b> vector de incógnitas. <b>b:</b> vector de términos independientes.</p><p>El vector de incógnitas es x = [x₁, x₂, x₃, x₄]ᵀ, asociado a Operaciones, Tecnología, Comercial y Administración.</p></div>
+ <div class="card"><h3>Condiciones de los métodos</h3><ul><li>Gauss con pivoteo parcial: matriz cuadrada no singular.</li><li>GC: matriz simétrica definida positiva.</li><li>GCP: matriz simétrica definida positiva y precondicionador adecuado.</li></ul><p>Jacobi utiliza M = diag(A), y resuelve Mz = r dividiendo cada componente del residuo por el elemento diagonal correspondiente.</p></div>`;
+ if(page==="datos")app.innerHTML=`
+ ${header("Entrada de datos","Puedes modificar la matriz A y el vector b del escenario seleccionado.")}
+ <div class="card">${selector()}<label>Matriz A (JSON: arreglo de filas)</label><textarea id="matrixInput">${JSON.stringify(A,null,2)}</textarea><label>Vector b (JSON)</label><textarea id="vectorInput">${JSON.stringify(b,null,2)}</textarea><button class="primary" id="saveData">Validar y guardar datos</button><div id="dataMessage"></div></div>
+ <div class="notice">Importante: GC y GCP necesitan que A sea simétrica y definida positiva. Si cambias los datos, valida las condiciones antes de ejecutar esos métodos.</div>`;
+ if(page==="escenarios")app.innerHTML=`
+ ${header("Escenarios financieros","Selecciona un escenario para examinar sus datos.")}
+ <div class="card">${selector()}<h3>${escenarioActual().nombre}</h3><p>${escenarioActual().descripcion}</p><h3>Matriz A</h3><div class="matrix">${A.map(f=>f.map(v=>String(v).padStart(10)).join(" ")).join("\n")}</div><h3>Vector b</h3><div class="matrix">${JSON.stringify(b)}</div><p><b>Número de condición aproximado κ₂(A):</b> ${exp(condicion(A))}</p></div>`;
+ if(page==="gauss")app.innerHTML=`
+ ${header("Solución numérica de referencia","Eliminación de Gauss con pivoteo parcial.")}
+ <div class="card">${selector()}<label>Tolerancia de referencia</label><input id="tolGauss" type="number" min="1e-14" step="any" value="0.000001"><button class="primary" id="runGauss">Resolver con Gauss</button><div id="outGauss"></div></div>`;
+ if(page==="gc")app.innerHTML=`
+ ${header("Gradientes Conjugados (GC)","Método iterativo sin precondicionamiento.")}
+ <div class="card">${selector()}<div class="row"><div><label>Tolerancia relativa</label><input id="tolGC" type="number" value="0.000001" min="1e-14" step="any"></div><div><label>Máximo de iteraciones</label><input id="maxGC" type="number" value="1000" min="1"></div></div><button class="primary" id="runGC">Ejecutar GC</button><div id="outGC"></div></div>
+ <div class="card"><h3>Fórmulas principales</h3><p>r₀ = b − Ax₀; p₀ = r₀</p><p>αₖ = (rₖᵀrₖ)/(pₖᵀApₖ)</p><p>xₖ₊₁ = xₖ + αₖpₖ; rₖ₊₁ = rₖ − αₖApₖ</p><p>βₖ = (rₖ₊₁ᵀrₖ₊₁)/(rₖᵀrₖ); pₖ₊₁ = rₖ₊₁ + βₖpₖ</p></div>`;
+ if(page==="gcp")app.innerHTML=`
+ ${header("Gradientes Conjugados Precondicionado (GCP)","GCP con precondicionador diagonal de Jacobi.")}
+ <div class="card">${selector()}<div class="row"><div><label>Tolerancia relativa</label><input id="tolGCP" type="number" value="0.000001" min="1e-14" step="any"></div><div><label>Máximo de iteraciones</label><input id="maxGCP" type="number" value="1000" min="1"></div></div><button class="primary" id="runGCP">Ejecutar GCP – Jacobi</button><div id="outGCP"></div></div>
+ <div class="card"><h3>Precondicionador de Jacobi</h3><p>M = diag(A). Se resuelve Mzₖ = rₖ; como M es diagonal, zᵢ = rᵢ/aᵢᵢ.</p><p>ρₖ = rₖᵀzₖ; αₖ = ρₖ/(pₖᵀApₖ); βₖ = ρₖ₊₁/ρₖ.</p><p>El criterio de parada utilizado es ||rₖ||₂ / ||b||₂ &lt; tolerancia.</p></div>`;
+ if(page==="comparacion")app.innerHTML=`
+ ${header("Comparación de métodos","Ejecuta los tres algoritmos para el mismo escenario.")}
+ <div class="card">${selector()}<label>Tolerancia relativa para GC y GCP</label><input id="tolComp" type="number" value="0.000001" min="1e-14" step="any"><button class="primary" id="runAll">Ejecutar Gauss, GC y GCP</button><div id="outComp"></div></div>
+ <div class="card"><h3>Convergencia</h3><canvas id="chart" width="900" height="290"></canvas><p class="small muted">Gráfico semilogarítmico del residuo relativo por iteración. Se dibuja cuando GC y GCP han sido ejecutados.</p></div>`;
+ if(page==="errores")app.innerHTML=`
+ ${header("Análisis de errores","Comparación respecto a la solución de referencia obtenida por Gauss.")}
+ <div class="card">${selector()}<button class="primary" id="runErrors">Calcular errores y residuos</button><div id="outErrors"></div></div>
+ <div class="notice">El error relativo se calcula como ||x método − x Gauss||₂ / ||x Gauss||₂. El residuo relativo se calcula como ||b − Ax||₂ / ||b||₂. Gauss se utiliza como referencia numérica, no como solución simbólica exacta.</div>`;
+ if(page==="qa")app.innerHTML=`
+ ${header("Pruebas y aseguramiento de calidad","Pruebas automáticas básicas sobre los datos y algoritmos.")}
+ <div class="card">${selector()}<button class="primary" id="runQA">Ejecutar pruebas QA</button><div id="outQA"></div></div>`;
+ if(page==="conclusiones")app.innerHTML=`
+ ${header("Conclusiones y referencias","Espacio para interpretar los resultados del experimento.")}
+ <div class="card"><h3>Conclusiones que debe completar el análisis</h3><ol><li>Verificar si GC y GCP convergen para cada escenario.</li><li>Comparar las soluciones calculadas con Gauss.</li><li>Determinar si Jacobi reduce el número de iteraciones.</li><li>Relacionar el comportamiento con el condicionamiento de la matriz.</li><li>Explicar las limitaciones de la precisión de punto flotante.</li></ol><h3>Referencias sugeridas</h3><ul><li>Burden, R. L. y Faires, J. D. Análisis numérico.</li><li>Golub, G. H. y Van Loan, C. F. Matrix Computations.</li><li>Saad, Y. Iterative Methods for Sparse Linear Systems.</li></ul><p class="muted small">Completa los datos bibliográficos según la edición realmente consultada y las indicaciones de tu docente.</p></div>`;
+ actualizarSelector();
+ bindPage(page);
+}
+function bindPage(page){
+ const A=escenarioActual().A,b=escenarioActual().b;
+ const show=(id,html)=>{const el=$(id);if(el)el.innerHTML=html};
+ const resultadoHTML=(r,metodo)=>`<div class="card"><h3>${metodo}</h3><p class="${r.convergio===false?"bad":"good"}">${r.convergio===false?"No alcanzó la tolerancia":"Cálculo completado / convergencia alcanzada"}</p>${tablaSolucion(r.solucion)}<p>Iteraciones: <b>${r.iteraciones??"—"}</b> · Residuo: <b>${exp(r.residuo)}</b> · Residuo relativo: <b>${exp(r.residuoRelativo)}</b></p></div>`;
+ $("saveData")?.addEventListener("click",()=>{
+  try{const na=JSON.parse($("matrixInput").value),nb=JSON.parse($("vectorInput").value);validarEntradas(na,nb);ESCENARIOS[actual].A=na;ESCENARIOS[actual].b=nb;show("dataMessage",'<p class="success">Datos validados y guardados en esta sesión.</p>');}
+  catch(e){show("dataMessage",`<p class="error">${e.message}</p>`)}
+ });
+ $("runGauss")?.addEventListener("click",()=>{
+  try{const r=resolverGauss(A,b);ultimo.gauss=r;show("outGauss",resultadoHTML({...r,convergio:true},"Solución de Gauss"));}catch(e){show("outGauss",`<p class="error">${e.message}</p>`)}
+ });
+ $("runGC")?.addEventListener("click",()=>{
+  try{const r=resolverGC(A,b,{tol:Number($("tolGC").value),max:Number($("maxGC").value)});ultimo.gc=r;show("outGC",resultadoHTML(r,"Resultado GC")+histHTML(r));}catch(e){show("outGC",`<p class="error">${e.message}</p>`)}
+ });
+ $("runGCP")?.addEventListener("click",()=>{
+  try{const r=resolverGCP(A,b,{tol:Number($("tolGCP").value),max:Number($("maxGCP").value)});ultimo.gcp=r;show("outGCP",resultadoHTML(r,"Resultado GCP – Jacobi")+histHTML(r));}catch(e){show("outGCP",`<p class="error">${e.message}</p>`)}
+ });
+ $("runAll")?.addEventListener("click",()=>{
+  try{
+   const tol=Number($("tolComp").value);
+   const g=resolverGauss(A,b),c=resolverGC(A,b,{tol,max:1000}),p=resolverGCP(A,b,{tol,max:1000});
+   ultimo={gauss:g,gc:c,gcp:p};
+   show("outComp",`<div class="tablewrap"><table><thead><tr><th>Método</th><th>Iteraciones</th><th>Residuo relativo</th><th>Estado</th></tr></thead><tbody>
+   <tr><td>Gauss</td><td>Directo</td><td>${exp(g.residuoRelativo)}</td><td>Calculado</td></tr>
+   <tr><td>GC</td><td>${c.iteraciones}</td><td>${exp(c.residuoRelativo)}</td><td>${c.convergio?"Convergió":"No convergió"}</td></tr>
+   <tr><td>GCP – Jacobi</td><td>${p.iteraciones}</td><td>${exp(p.residuoRelativo)}</td><td>${p.convergio?"Convergió":"No convergió"}</td></tr>
+   </tbody></table></div>${tablaSolucion(g.solucion)}<p>Condición aproximada κ₂(A): <b>${exp(condicion(A))}</b></p>`);
+   dibujar("chart",c.historial,p.historial);
+  }catch(e){show("outComp",`<p class="error">${e.message}</p>`)}
+ });
+ $("runErrors")?.addEventListener("click",()=>{
+  try{
+   const ref=resolverGauss(A,b),c=resolverGC(A,b,{tol:1e-6,max:1000}),p=resolverGCP(A,b,{tol:1e-6,max:1000});
+   const er=x=>norma(resta(x,ref.solucion))/(norma(ref.solucion)||1);
+   const rows=[["GC",c,er(c.solucion)],["GCP – Jacobi",p,er(p.solucion)]];
+   show("outErrors",`<div class="tablewrap"><table><thead><tr><th>Método</th><th>Error absoluto (norma)</th><th>Error relativo</th><th>Residuo relativo</th></tr></thead><tbody>${rows.map(([n,r,e])=>`<tr><td>${n}</td><td>${exp(norma(resta(r.solucion,ref.solucion)))}</td><td>${exp(e)}</td><td>${exp(relativo(A,r.solucion,b))}</td></tr>`).join("")}</tbody></table></div>`);
+  }catch(e){show("outErrors",`<p class="error">${e.message}</p>`)}
+ });
+ $("runQA")?.addEventListener("click",()=>{
+  const tests=[];
+  try{validarEntradas(A,b);tests.push(["Dimensiones y datos finitos",true,"Matriz cuadrada y vector compatible."])}catch(e){tests.push(["Dimensiones y datos finitos",false,e.message])}
+  try{validarSPD(A);tests.push(["Simetría y definida positiva",true,"Condiciones de GC/GCP verificadas."])}catch(e){tests.push(["Simetría y definida positiva",false,e.message])}
+  try{const g=resolverGauss(A,b);tests.push(["Gauss",g.residuoRelativo<1e-8,"Residuo relativo: "+exp(g.residuoRelativo)])}catch(e){tests.push(["Gauss",false,e.message])}
+  try{const g=resolverGC(A,b,{tol:1e-6});tests.push(["Gradientes Conjugados",g.convergio,"Iteraciones: "+g.iteraciones])}catch(e){tests.push(["Gradientes Conjugados",false,e.message])}
+  try{const g=resolverGCP(A,b,{tol:1e-6});tests.push(["GCP – Jacobi",g.convergio,"Iteraciones: "+g.iteraciones])}catch(e){tests.push(["GCP – Jacobi",false,e.message])}
+  show("outQA",`<table><thead><tr><th>Prueba</th><th>Estado</th><th>Detalle</th></tr></thead><tbody>${tests.map(t=>`<tr><td>${t[0]}</td><td class="${t[1]?"good":"bad"}">${t[1]?"APROBADA":"REVISAR"}</td><td>${t[2]}</td></tr>`).join("")}</tbody></table>`);
+ });
+}
+function histHTML(r){return `<details class="card"><summary>Ver historial de residuos (${r.historial.length} registros)</summary><div class="tablewrap"><table><thead><tr><th>Iteración</th><th>Residuo</th><th>Residuo relativo</th></tr></thead><tbody>${r.historial.map(h=>`<tr><td>${h.k}</td><td>${exp(h.r)}</td><td>${exp(h.rel)}</td></tr>`).join("")}</tbody></table></div></details>`}
+function dibujar(id,h1,h2){
+ const c=$(id);if(!c)return;const ctx=c.getContext("2d"),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);
+ const all=[...h1.map(x=>x.rel),...h2.map(x=>x.rel)].filter(v=>v>0);
+ if(!all.length)return;const min=Math.min(...all),max=Math.max(...all),lo=Math.log10(min),hi=Math.log10(max);
+ const X=i=>45+i/(Math.max(h1.length,h2.length)-1||1)*(w-70),Y=v=>h-30-(Math.log10(Math.max(v,min))-lo)/(hi-lo||1)*(h-65);
+ ctx.strokeStyle="#94a3b8";ctx.beginPath();ctx.moveTo(45,15);ctx.lineTo(45,h-30);ctx.lineTo(w-20,h-30);ctx.stroke();
+ function line(data,color){ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();data.forEach((v,i)=>i?ctx.lineTo(X(i),Y(v)):ctx.moveTo(X(i),Y(v)));ctx.stroke()}
+ line(h1.map(x=>x.rel),"#2563eb");line(h2.map(x=>x.rel),"#0891b2");
+ ctx.font="14px Arial";ctx.fillStyle="#2563eb";ctx.fillText("GC",55,18);ctx.fillStyle="#0891b2";ctx.fillText("GCP – Jacobi",100,18);ctx.fillStyle="#475569";ctx.fillText("Iteraciones",w/2,h-7);
+}
+document.querySelectorAll("nav button").forEach(btn=>btn.addEventListener("click",()=>{
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");render();
+}));
+render();
+</script>
+</body>
+</html>
