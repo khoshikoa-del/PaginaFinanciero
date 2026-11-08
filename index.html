@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -26,7 +26,7 @@ label{display:block;font-size:13px;font-weight:bold;margin:10px 0 5px}input,sele
 <body>
 <header><h1>Desafío Académico de Métodos Numéricos</h1><p>Aplicación del Método de Gradientes Conjugados Precondicionado en problemas financieros</p></header>
 <div class="shell">
-<aside><div class="student"><b>Estudiante: Estrella Condori</b><br>Mención: Ingeniería en Sistemas<br>Materia: Métodos Numéricos<br>Universidad Mayor de San Andrés</div>
+<aside><div class="student"><b>Estudiante: Keyla Estrella  Huanca Condori</b><br>Mención: Ingeniería en Sistemas<br>Materia: Métodos Numéricos<br>Universidad Mayor de San Andrés</div>
 <nav id="nav">
 <button class="active" data-page="inicio">⌂ Inicio</button>
 <button data-page="caso">Caso financiero</button>
@@ -42,7 +42,7 @@ label{display:block;font-size:13px;font-weight:bold;margin:10px 0 5px}input,sele
 </nav></aside>
 <main id="app"></main>
 </div>
-<footer>Proyecto académico · Empresa ficticia · Datos simulados y documentados · Archivo único HTML, CSS y JavaScript</footer>
+<footer>Proyecto académico </footer>
 <script>
 "use strict";
 const UNITS=["Operaciones","Tecnología","Comercial","Administración"];
@@ -120,120 +120,4 @@ if(page==="metodos")h=title("Gradientes Conjugados Precondicionado vs GC","PCG a
 if(page==="errores")h=title("Análisis de errores y condicionamiento","Errores por componente respecto a la solución de referencia de Gauss.")+`<div class="card"><button class="primary" id="errorsBtn">Calcular errores y condición</button><div id="errorsOut"></div></div>`;
 if(page==="comparativa")h=title("Tabla comparativa obligatoria","Ejecuta los tres escenarios y compara soluciones, errores, iteraciones, condición y residuos.")+`<div class="card"><button class="primary" id="compareBtn">Calcular los tres escenarios</button><div id="compareOut"></div></div>`;
 if(page==="qa")h=title("Módulo de pruebas de software (QA)","Casos obligatorios con entrada, resultado esperado, resultado obtenido y conclusión.")+`<div class="card"><button class="primary" id="qaBtn">Ejecutar las cuatro pruebas QA</button><div id="qaOut"></div></div>`;
-if(page==="conclusiones")h=title("Conclusiones y referencias","Interpreta los resultados calculados; evita conclusiones no respaldadas por las ejecuciones.")+`<div class="card"><h3>Guía de interpretación</h3><ul><li>Si el residuo relativo final es menor que 10⁻⁶, el criterio de parada se satisface.</li><li>Un número de condición alto indica mayor sensibilidad de la solución ante perturbaciones.</li><li>En estrés se conserva A y se aumenta b en 15 %: cambia el punto de equilibrio, pero κ(A) no cambia.</li><li>En el escenario mal condicionado se modifica el escalamiento diagonal; compara κ(A) con κ(M⁻¹A) para evaluar Jacobi.</li><li>Compara las iteraciones GC y GCP sin asumir que el precondicionador mejora todos los sistemas.</li></ul><div id="conclusionLive"></div><h3>Bibliografía principal</h3><p>Suñagua S., P. (2020). Método de Gradientes Conjugados Precondicionado. <i>Revista Boliviana de Matemática – UMSA</i>, 04, 2–7.</p><p>Golub, G. H. y Van Loan, C. F. (2013). <i>Matrix Computations</i> (4.ª ed.). Johns Hopkins University Press.</p><p>Saad, Y. (2003). <i>Iterative Methods for Sparse Linear Systems</i> (2.ª ed.). SIAM.</p><p><b>Fuentes de datos:</b> matrices y vectores sintéticos definidos en este proyecto para demostración académica; no se utilizaron datos financieros reales.</p></div>`;
-$("app").innerHTML=h;
-if(page==="modelo"){$("modelMatrix").textContent=matrixText(A,b);$("modelProof").innerHTML=minorTable(A)}
-if(page==="datos"){$("dataScenario").onchange=e=>{let s=SCENARIOS[e.target.value];$("matrixInput").value=JSON.stringify(s.A,null,2);$("rhsInput").value=JSON.stringify(s.b,null,2)};$("applyData").onclick=applyData}
-document.querySelectorAll("[data-load]").forEach(el=>el.onclick=()=>loadScenario(el.dataset.load,page));
-if(page==="referencia")$("gaussBtn").onclick=showGauss;
-if(page==="metodos")$("methodsBtn").onclick=showMethods;
-if(page==="errores")$("errorsBtn").onclick=showErrors;
-if(page==="comparativa")$("compareBtn").onclick=showComparison;
-if(page==="qa")$("qaBtn").onclick=runQA;
-if(page==="conclusiones")updateConclusion();
-}
-function loadScenario(k,page){active=k;A=clone(SCENARIOS[k].A);b=SCENARIOS[k].b.slice();x0=Array(b.length).fill(0);editedManually=false;render(page)}
-function applyData(){
-  try{
-    let M=JSON.parse($("matrixInput").value),r=JSON.parse($("rhsInput").value),x=JSON.parse($("initialInput").value),t=Number($("tolInput").value),it=Number($("maxInput").value);
-    validate(M,r);
-    if(!Array.isArray(x)||x.length!==r.length||!x.every(Number.isFinite))throw Error("x₀ debe tener n componentes numéricas.");
-    if(!(t>0)||!(it>=1))throw Error("Tolerancia y máximo de iteraciones deben ser positivos.");
-    if(!symmetry(M))throw Error("La matriz ingresada no es simétrica.");
-    cholesky(M);
-    A=M;b=r;x0=x;tol=t;maxIt=Math.floor(it);preconditioner=$("preInput").value;
-    editedManually=!Object.values(SCENARIOS).some(s=>JSON.stringify(s.A)===JSON.stringify(M)&&JSON.stringify(s.b)===JSON.stringify(r));
-    if(!editedManually){
-      for(const [k,s] of Object.entries(SCENARIOS)){if(JSON.stringify(s.A)===JSON.stringify(M)&&JSON.stringify(s.b)===JSON.stringify(r)){active=k;break;}}
-    }
-    $("dataMsg").innerHTML='<p class="success">Datos aplicados. Matriz simétrica definida positiva: validación aprobada. Los resultados de referencia, GC, GCP, errores y condición se recalculan al ejecutar sus módulos.</p>';
-  }catch(e){$("dataMsg").innerHTML=`<p class="error">Entrada rechazada sin cerrar la aplicación: ${e.message}</p>`}
-}
-function showGauss(){try{let x=gauss(A,b);$("gaussOut").innerHTML=vectorTable(x)+`<p>Residuo relativo de referencia: <b>${sci(relres(A,x,b))}</b></p>`}catch(e){$("gaussOut").innerHTML=`<p class="error">${e.message}</p>`}}
-function showMethods(){try{let g=cg(A,b,false),p=cg(A,b,true);$("methodsOut").innerHTML=`<div class="grid"><div class="card"><h3>GC simple</h3>${vectorTable(g.x)}<p>Iteraciones: <b>${g.it}</b></p><p>Residuo relativo: ${sci(g.rel)}</p><p class="${g.ok?"good":"bad"}">${g.ok?"CONVERGIÓ":"NO CONVERGIÓ"}</p></div><div class="card"><h3>GCP · Jacobi</h3>${vectorTable(p.x)}<p>Iteraciones: <b>${p.it}</b></p><p>Residuo relativo: ${sci(p.rel)}</p><p class="${p.ok?"good":"bad"}">${p.ok?"CONVERGIÓ":"NO CONVERGIÓ"}</p></div></div><div class="notice">M=diag(A). En cada iteración se resuelve Mzₖ=rₖ; αₖ=(rₖᵀzₖ)/(pₖᵀApₖ); βₖ=(rₖ₊₁ᵀzₖ₊₁)/(rₖᵀzₖ). Criterio: ||rₖ||₂/||b||₂ &lt; ${sci(tol)}.</div>`}catch(e){$("methodsOut").innerHTML=`<p class="error">${e.message}</p>`}}
-function showErrors(){
-  try{
-    let ref=gauss(A,b),p=cg(A,b,true),rows=ref.map((v,i)=>{let ea=Math.abs(v-p.x[i]),er=v===0?null:ea/Math.abs(v);return `<tr><td>x${i+1} · ${UNITS[i]}</td><td>${fmt(v)}</td><td>${fmt(p.x[i])}</td><td>${sci(ea)}</td><td>${er===null?"No definido":sci(er)}</td><td>${er===null?"No definido":sci(er*100)+"%"}</td></tr>`}).join("");
-    $("errorsOut").innerHTML=`<div class="tablewrap"><table><tr><th>Variable</th><th>Referencia</th><th>GCP</th><th>Error absoluto Ea</th><th>Error relativo Er</th><th>Error porcentual Ep</th></tr>${rows}</table></div><p>Residuo relativo global: <b>${sci(relres(A,p.x,b))}</b></p><p>Número de condición κ∞(A): <b>${sci(condition(A))}</b></p><p>Número de condición κ∞ de la matriz simétricamente escalada D<sup>−1/2</sup>AD<sup>−1/2</sup> (referencia del espectro de PCG-Jacobi): <b>${sci(preconditionedCondition(A,"jacobi"))}</b></p>`;
-  }catch(e){$("errorsOut").innerHTML=`<p class="error">${e.message}</p>`}
-}
-function showComparison(){
-  let old={A,b,x0,tol,maxIt};
-  try{
-    let results={};tol=1e-6;maxIt=1000;
-    for(let [k,s] of Object.entries(SCENARIOS)){
-      A=clone(s.A);b=s.b.slice();x0=Array(b.length).fill(0);
-      let ref=gauss(A,b),g=cg(A,b,false),p=cg(A,b,true);
-      let errs=ref.map((v,i)=>{let ea=Math.abs(v-p.x[i]);return{ea,er:v===0?null:ea/Math.abs(v)}});
-      results[k]={ref,g,p,errs,kA:condition(A),kP:preconditionedCondition(A,"jacobi"),res:relres(A,p.x,b)};
-    }
-    let keys=["ideal","estres","mal"],out='<div class="tablewrap"><table><tr><th>Indicador</th><th>Ideal</th><th>Bajo estrés</th><th>Mal condicionado</th></tr>';
-    let fields=[
-      ["Solución de referencia",k=>results[k].ref.map(fmt).join("<br>")],
-      ["Solución GCP",k=>results[k].p.x.map(fmt).join("<br>")],
-      ["Iteraciones GC",k=>results[k].g.it],
-      ["Iteraciones GCP",k=>results[k].p.it],
-      ["κ∞(A)",k=>sci(results[k].kA)],
-      ["κ∞ precond. simétrica",k=>sci(results[k].kP)],
-      ["Residuo relativo GCP",k=>sci(results[k].res)],
-      ["Convergencia GC / GCP",k=>(results[k].g.ok?"Sí":"No")+" / "+(results[k].p.ok?"Sí":"No")]
-    ];
-    for(let [label,fn] of fields)out+=`<tr><th>${label}</th>${keys.map(k=>`<td>${fn(k)}</td>`).join("")}</tr>`;
-    for(let i=0;i<4;i++){
-      out+=`<h4>x${i+1} · ${UNITS[i]}</h4><table><tr><th>Indicador</th><th>Ideal</th><th>Estrés</th><th>Mal condicionado</th></tr>`;
-      for(let [label,field,mult] of [["Ea","ea",1],["Er","er",1],["Ep","er",100]]){
-        out+=`<tr><th>${label}</th>${keys.map(k=>{let v=results[k].errs[i][field];return `<td>${v===null?"No definido":sci(v*mult)+(label==="Ep"?"%":"")}</td>`}).join("")}</tr>`;
-      }
-      out+=`</table>`;
-    }
-    out+=`<div class="notice">La tolerancia aplicada es 10⁻⁶ y x₀=0 (valores fijados para la comparación estandarizada). La condición precondicionada se calcula con la matriz simétricamente escalada D⁻¹/²AD⁻¹/² (κ∞), similar a M⁻¹A y apropiada para medir el espectro de PCG. En estrés, A no cambia y b aumenta 15 %, por lo que el condicionamiento de A se mantiene.</div>`;
-    $("compareOut").innerHTML=out;
-  }catch(e){$("compareOut").innerHTML=`<p class="error">${e.message}</p>`}
-  finally{A=old.A;b=old.b;x0=old.x0;tol=old.tol;maxIt=old.maxIt}
-}
-function runQA(){
-  let tests=[];
-  function test(name,input,expected,fn){
-    try{let actual=fn();let ok=!!actual.ok;tests.push({name,input,expected,actual:actual.text,ok})}
-    catch(e){tests.push({name,input,expected,actual:"Error controlado: "+e.message,ok:false})}
-  }
-  test("1. Carga de escenarios","Cargar Ideal, Bajo estrés y Mal condicionado","Los tres se cargan y sus matrices son SPD",()=>{
-    let details=[];
-    for(let [k,s] of Object.entries(SCENARIOS)){
-      cholesky(s.A);
-      if(!symmetry(s.A))throw Error(k+" no simétrica");
-      details.push(s.name+": cargado, simétrico y SPD");
-    }
-    return{ok:true,text:details.join("; ")};
-  });
-  test("2. Validación de matriz no válida","Matriz no simétrica [[4,2,0,0],[0,4,0,0],[0,0,4,0],[0,0,0,4]]","El sistema detecta y notifica el error sin colapsar",()=>{
-    let bad=[[4,2,0,0],[0,4,0,0],[0,0,4,0],[0,0,0,4]],caught=false;
-    try{cholesky(bad)}catch(e){caught=true}
-    return{ok:caught,text:caught?"Matriz rechazada con mensaje de validación; aplicación continúa":"No se detectó la matriz no simétrica"};
-  });
-  test("3. Edición dinámica","Perturbar A[0][0] en +0.2 y recalcular","Se obtienen referencia, GCP y error para la matriz editada",()=>{
-    let M=clone(SCENARIOS.ideal.A);M[0][0]+=.2;
-    let r=SCENARIOS.ideal.b,ref=gauss(M,r),pcg=cg(M,r,true),ea=norm(sub(ref,pcg.x));
-    return{ok:pcg.ok&&Number.isFinite(ea),text:`Referencia y GCP recalculados; error vectorial absoluto ${sci(ea)}`};
-  });
-  test("4. Comparación de precondicionamiento","Ejecutar GC y GCP en escenario mal condicionado","GCP converge en menor o igual número de iteraciones que GC",()=>{
-    let s=SCENARIOS.mal,save={A,b,x0};
-    A=clone(s.A);b=s.b.slice();x0=[0,0,0,0];
-    let g=cg(A,b,false),p=cg(A,b,true);
-    A=save.A;b=save.b;x0=save.x0;
-    return{ok:g.ok&&p.ok&&p.it<=g.it,text:`GC: ${g.it} iteraciones (${g.ok?"convergió":"no convergió"}); GCP: ${p.it} (${p.ok?"convergió":"no convergió"})`};
-  });
-  let passed=tests.filter(t=>t.ok).length;
-  $("qaOut").innerHTML=`<div class="tablewrap"><table><tr><th>Caso de prueba</th><th>Entrada</th><th>Resultado esperado</th><th>Resultado obtenido</th><th>Conclusión</th></tr>${tests.map(t=>`<tr><td>${t.name}</td><td>${t.input}</td><td>${t.expected}</td><td>${t.actual}</td><td class="${t.ok?"good":"bad"}">${t.ok?"APROBADA":"REVISAR"}</td></tr>`).join("")}</table></div><p class="${passed===tests.length?"success":"error"}">${passed} de ${tests.length} pruebas aprobadas. Una prueba que falla se informa; no se marca artificialmente como aprobada.</p>`;
-}
-function updateConclusion(){
-  try{
-    let g=cg(A,b,false),p=cg(A,b,true);
-    $("conclusionLive").innerHTML=`<div class="notice"><b>Resultado del escenario activo (${activeLabel()}):</b> GC ${g.ok?"convergió":"no convergió"} en ${g.it} iteraciones; GCP ${p.ok?"convergió":"no convergió"} en ${p.it} iteraciones. Residuo GCP ${sci(p.rel)}. κ∞(A)=${sci(condition(A))}; condición precondicionada simétrica (κ∞)=${sci(preconditionedCondition(A,"jacobi"))}. Interpreta estos valores junto con la comparación global.</div>`;
-  }catch(e){$("conclusionLive").innerHTML=`<p class="error">No se pudo generar la interpretación: ${e.message}</p>`}
-}
-document.querySelectorAll("nav button").forEach(btn=>btn.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");render(btn.dataset.page)});
-render("inicio");
-</script>
-</body>
-</html>
+if(page==="conclusiones")h=title("Conclusiones y referencias","Interpreta los resultados calculados; evita conclusiones no respaldadas por las ejecuciones.")+`<div class="card"><h3>Guía de interpretación</h3><ul><li>Si el residuo relativo final es menor que 10⁻⁶, el criterio de parada se satisface.</li><li>Un número de condición alto indica mayor sensibilidad de la solución ante perturbaciones.</li><li>En estrés se conserva A y se aumenta b en 15 %: cambia el punto de equilibrio, pero κ(A) no cambia.</li><li>En el escenario mal condicionado se modifica el escalamiento diagonal; compara κ(A) con κ(M⁻¹A) para evaluar Jacobi.</li><li>Compara las iteraciones GC y GCP sin asumir que el precondicionador mejora todos los sistemas.</li></ul><div id="conclusionLive"></div><h3>Bibliografía principal</h3><p>Suñagua S., P. (2020). Método de Gradientes Conjugados Precondicionado. <i>Revista Boliviana de Matemática – UMSA</i>, 04, 2–7.</p><p>Golub, G. H. y Van Loan, C. F. (2013). <i>Matrix Computations</i> (4.ª ed.). Johns Hopkins University Press.</p><p>Saad, Y. (2003). <i>Iterative Methods for Sparse Linear Systems</i> (2.ª ed.). SIAM.</p></div>`;
