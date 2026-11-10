@@ -1,322 +1,973 @@
 
-// FINALIZAR RENDERIZADO
-$("app").innerHTML = h;
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafío Académico | Gradientes Conjugados PCG</title>
 
-// NAVEGACIÓN ENTRE SECCIONES
+<style>
+:root{
+  --bg:#0b1020;
+  --panel:#141d35;
+  --panel2:#1b2947;
+  --text:#edf3ff;
+  --muted:#aab8d3;
+  --blue:#60a5fa;
+  --cyan:#22d3ee;
+  --green:#34d399;
+  --orange:#fbbf24;
+  --red:#fb7185;
+  --border:#2b3a5c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+header{
+  padding:22px 28px;
+  background:linear-gradient(120deg,#172554,#164e63);
+  border-bottom:1px solid var(--border);
+}
+header h1{margin:0 0 8px;font-size:25px}
+header p{margin:0;color:#dbeafe}
+.layout{display:flex;min-height:calc(100vh - 100px)}
+aside{
+  width:245px;
+  background:#10182d;
+  padding:18px 12px;
+  border-right:1px solid var(--border);
+  flex-shrink:0;
+}
+aside h3{
+  color:var(--cyan);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  padding:0 12px;
+}
+nav button{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:transparent;
+  border:0;
+  color:var(--muted);
+  padding:12px;
+  border-radius:8px;
+  margin:3px 0;
+  cursor:pointer;
+  font-size:14px;
+}
+nav button:hover,nav button.active{
+  background:#203456;
+  color:white;
+}
+main{flex:1;padding:28px;min-width:0;max-width:1400px;margin:auto}
+h2{font-size:27px;margin-top:0}
+h3{color:#bfdbfe}
+p{line-height:1.65;color:#d1dcef}
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  padding:20px;
+  border-radius:13px;
+  margin-bottom:18px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:15px;
+}
+.stat{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:17px;
+}
+.stat strong{
+  display:block;
+  font-size:25px;
+  color:var(--cyan);
+  margin-top:8px;
+}
+.muted{color:var(--muted);font-size:13px}
+button.action{
+  border:0;
+  background:#2563eb;
+  color:white;
+  padding:11px 17px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  margin:5px 5px 5px 0;
+}
+button.action:hover{background:#1d4ed8}
+button.secondary{background:#334155}
+button.secondary:hover{background:#475569}
+input,select{
+  background:#0b1429;
+  border:1px solid var(--border);
+  border-radius:7px;
+  color:white;
+  padding:10px;
+  width:100%;
+  margin:6px 0 12px;
+}
+label{font-size:13px;color:#cbd5e1}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin:12px 0;
+  font-size:13px;
+}
+th,td{
+  border:1px solid var(--border);
+  padding:10px;
+  text-align:center;
+}
+th{background:#203456;color:#bfdbfe}
+tr:nth-child(even){background:#17233d}
+.result{
+  background:#0b1429;
+  padding:14px;
+  border-radius:9px;
+  border:1px solid var(--border);
+  overflow-x:auto;
+}
+.good{color:var(--green)}
+.warn{color:var(--orange)}
+.bad{color:var(--red)}
+.formgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:10px;
+}
+.barrow{
+  display:grid;
+  grid-template-columns:130px 1fr 70px;
+  gap:10px;
+  align-items:center;
+  margin:12px 0;
+}
+.bar{
+  height:15px;
+  border-radius:10px;
+  background:#263653;
+  overflow:hidden;
+}
+.bar span{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,var(--blue),var(--cyan));
+}
+footer{
+  text-align:center;
+  color:var(--muted);
+  padding:25px;
+  border-top:1px solid var(--border);
+}
+.hidden{display:none}
+@media(max-width:750px){
+  .layout{display:block}
+  aside{width:100%;border-right:0;border-bottom:1px solid var(--border)}
+  nav{display:grid;grid-template-columns:repeat(2,1fr)}
+  main{padding:17px}
+  header{padding:18px}
+  header h1{font-size:20px}
+  .barrow{grid-template-columns:90px 1fr 55px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>DESAFÍO ACADÉMICO DE MÉTODOS NUMÉRICOS</h1>
+  <p>Gradientes Conjugados Precondicionado (PCG) aplicado a problemas financieros</p>
+</header>
+
+<div class="layout">
+
+<aside>
+  <h3>Menú principal</h3>
+  <nav id="menu">
+    <button class="active" data-page="inicio"> Inicio</button>
+    <button data-page="caso">01. Caso de estudio</button>
+    <button data-page="modelo">02. Modelo matemático</button>
+    <button data-page="datos">03. Ingreso de datos</button>
+    <button data-page="escenarios">04. Escenarios</button>
+    <button data-page="metodos">05. Métodos numéricos</button>
+    <button data-page="errores">06. Análisis de errores</button>
+    <button data-page="comparativa">07. Comparativa</button>
+    <button data-page="qa">08. Validación</button>
+    <button data-page="conclusiones">09. Conclusiones</button>
+  </nav>
+</aside>
+
+<main id="app"></main>
+</div>
+
+<footer>
+  Proyecto académico | Ingeniería en Sistemas | Métodos Numéricos
+</footer>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
 let currentPage = "inicio";
+let lastResult = null;
 
-function navigate(page) {
-  currentPage = page;
-  document.querySelectorAll("#nav button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.page === page);
-  });
-  render(page);
+const scenarios = {
+  ideal:{
+    name:"Sistema financiero estable",
+    A:[[10,-1,0],[-1,10,-1],[0,-1,10]],
+    b:[9,8,9],
+    description:"Representa una situación estable, con baja interferencia entre variables financieras."
+  },
+  stress:{
+    name:"Escenario de estrés financiero",
+    A:[[8,-2,-1],[-2,7,-2],[-1,-2,8]],
+    b:[5,3,6],
+    description:"Simula una situación de mayor interacción entre variables y restricciones financieras."
+  },
+  difficult:{
+    name:"Sistema mal condicionado",
+    A:[[1,0.99,0],[0.99,1,0.99],[0,0.99,1.99]],
+    b:[2,2.98,2.99],
+    description:"Permite observar cómo un sistema sensible puede afectar la convergencia numérica."
+  }
+};
+
+let selectedScenario = "ideal";
+let A = JSON.parse(JSON.stringify(scenarios.ideal.A));
+let b = [...scenarios.ideal.b];
+let tolerance = 0.000001;
+let maxIterations = 100;
+
+function dot(a,b){
+  return a.reduce((s,v,i)=>s+v*b[i],0);
 }
 
-$("nav").addEventListener("click", e => {
-  const btn = e.target.closest("button[data-page]");
-  if (btn) navigate(btn.dataset.page);
-});
-
-// FORMATO DE RESULTADOS
-function resultBox(result) {
-  return `<div class="${result.ok ? "success" : "error"}">
-    ${result.ok ? "Convergencia alcanzada" : "No se alcanzó la convergencia"}
-    <br>Iteraciones: ${result.it}
-    <br>Residuo relativo: ${sci(result.rel)}
-  </div>`;
+function norm(a){
+  return Math.sqrt(dot(a,a));
 }
 
-function resultChart(gc, gcp) {
-  const max = Math.max(gc.it, gcp.it, 1);
-  return `
-    <h3>Comparación de iteraciones</h3>
-    <p>Gradientes conjugados (GC): ${gc.it}</p>
-    <div class="bar"><span style="width:${100*gc.it/max}%"></span></div>
-    <p>Gradientes conjugados precondicionados (GCP): ${gcp.it}</p>
-    <div class="bar"><span style="width:${100*gcp.it/max}%"></span></div>
-  `;
+function matVec(M,x){
+  return M.map(row=>dot(row,x));
 }
 
-// CARGAR ESCENARIOS
-$("nav").addEventListener("click", e => {
-  const btn = e.target.closest("[data-load]");
-  if (!btn) return;
+function subtract(a,b){
+  return a.map((v,i)=>v-b[i]);
+}
 
-  active = btn.dataset.load;
-  A = clone(SCENARIOS[active].A);
-  b = SCENARIOS[active].b.slice();
-  x0 = Array(4).fill(0);
-  editedManually = false;
-  navigate("escenarios");
-});
+function add(a,b){
+  return a.map((v,i)=>v+b[i]);
+}
 
-// CAMBIAR ESCENARIO DESDE ENTRADA DE DATOS
-document.addEventListener("change", e => {
-  if (e.target.id !== "dataScenario") return;
+function multiplyScalar(a,k){
+  return a.map(v=>v*k);
+}
 
-  const key = e.target.value;
-  if (!SCENARIOS[key]) return;
+function isSymmetric(M){
+  for(let i=0;i<M.length;i++)
+    for(let j=0;j<M.length;j++)
+      if(Math.abs(M[i][j]-M[j][i])>1e-10)return false;
+  return true;
+}
 
-  active = key;
-  A = clone(SCENARIOS[key].A);
-  b = SCENARIOS[key].b.slice();
-  editedManually = false;
+function isPositiveDefinite(M){
+  const n=M.length;
+  const L=Array.from({length:n},()=>Array(n).fill(0));
 
-  $("matrixInput").value = JSON.stringify(A, null, 2);
-  $("rhsInput").value = JSON.stringify(b, null, 2);
-});
+  for(let i=0;i<n;i++){
+    for(let j=0;j<=i;j++){
+      let sum=M[i][j];
+      for(let k=0;k<j;k++)sum-=L[i][k]*L[j][k];
 
-// VALIDACIÓN Y APLICACIÓN DE DATOS
-document.addEventListener("click", e => {
-  if (e.target.id !== "applyData") return;
-
-  const msg = $("dataMsg");
-
-  try {
-    const newA = JSON.parse($("matrixInput").value);
-    const newB = JSON.parse($("rhsInput").value);
-    const newX = JSON.parse($("initialInput").value);
-    const newTol = Number($("tolInput").value);
-    const newMax = Number($("maxInput").value);
-    const newPre = $("preInput").value;
-
-    validate(newA, newB);
-
-    if (!Array.isArray(newX) || newX.length !== newB.length ||
-        !newX.every(Number.isFinite)) {
-      throw Error("El vector inicial no es válido.");
+      if(i===j){
+        if(sum<=0)return false;
+        L[i][j]=Math.sqrt(sum);
+      }else{
+        L[i][j]=sum/L[j][j];
+      }
     }
+  }
+  return true;
+}
 
-    if (!(newTol > 0) || !Number.isFinite(newTol)) {
-      throw Error("La tolerancia debe ser positiva.");
+function cholesky(M){
+  const n=M.length;
+  const L=Array.from({length:n},()=>Array(n).fill(0));
+
+  for(let i=0;i<n;i++){
+    for(let j=0;j<=i;j++){
+      let sum=M[i][j];
+      for(let k=0;k<j;k++)sum-=L[i][k]*L[j][k];
+
+      if(i===j){
+        if(sum<=0)throw Error("La matriz no es definida positiva.");
+        L[i][j]=Math.sqrt(sum);
+      }else{
+        L[i][j]=sum/L[j][j];
+      }
     }
-
-    if (!Number.isInteger(newMax) || newMax < 1) {
-      throw Error("El máximo de iteraciones debe ser positivo.");
-    }
-
-    cholesky(newA);
-
-    A = clone(newA);
-    b = newB.slice();
-    x0 = newX.slice();
-    tol = newTol;
-    maxIt = newMax;
-    preconditioner = newPre;
-    editedManually = true;
-
-    msg.innerHTML = `<div class="success">
-      Datos validados correctamente. El modelo está actualizado.
-    </div>`;
-
-  } catch (err) {
-    msg.innerHTML = `<div class="error">${err.message}</div>`;
   }
-});
+  return L;
+}
 
-// SOLUCIÓN DE REFERENCIA: GAUSS
-document.addEventListener("click", e => {
-  if (e.target.id !== "gaussBtn") return;
-
-  try {
-    const x = gauss(A, b);
-    const r = relres(A, x, b);
-
-    $("gaussOut").innerHTML =
-      vectorTable(x) +
-      `<div class="success">
-      Residuo relativo: ${sci(r)}
-      </div>`;
-
-  } catch (err) {
-    $("gaussOut").innerHTML =
-      `<div class="error">${err.message}</div>`;
+function solveLower(L,b){
+  const n=b.length;
+  const x=Array(n).fill(0);
+  for(let i=0;i<n;i++){
+    let sum=b[i];
+    for(let j=0;j<i;j++)sum-=L[i][j]*x[j];
+    x[i]=sum/L[i][i];
   }
-});
+  return x;
+}
 
-// COMPARACIÓN GC Y GCP
-document.addEventListener("click", e => {
-  if (e.target.id !== "methodsBtn") return;
-
-  try {
-    const gc = cg(A, b, false);
-    const gcp = cg(A, b, true);
-
-    $("methodsOut").innerHTML = `
-      <h3>Gradientes conjugados (GC)</h3>
-      ${resultBox(gc)}
-      ${vectorTable(gc.x)}
-
-      <h3>Gradientes conjugados precondicionados (GCP)</h3>
-      ${resultBox(gcp)}
-      ${vectorTable(gcp.x)}
-
-      ${resultChart(gc, gcp)}
-    `;
-
-  } catch (err) {
-    $("methodsOut").innerHTML =
-      `<div class="error">${err.message}</div>`;
+function solveUpper(U,b){
+  const n=b.length;
+  const x=Array(n).fill(0);
+  for(let i=n-1;i>=0;i--){
+    let sum=b[i];
+    for(let j=i+1;j<n;j++)sum-=U[i][j]*x[j];
+    x[i]=sum/U[i][i];
   }
-});
+  return x;
+}
 
-// ERRORES Y CONDICIONAMIENTO
-document.addEventListener("click", e => {
-  if (e.target.id !== "errorsBtn") return;
+function solveCholesky(M,b){
+  const L=cholesky(M);
+  const y=solveLower(L,b);
+  const LT=L[0].map((_,j)=>L.map(row=>row[j]));
+  return solveUpper(LT,y);
+}
 
-  try {
-    const exact = gauss(A, b);
-    const gc = cg(A, b, false);
-    const gcp = cg(A, b, true);
+function solveGauss(M,b){
+  const n=b.length;
+  const C=M.map((row,i)=>[...row,b[i]]);
 
-    const rows = exact.map((v, i) => `
-      <tr>
-        <td>${UNITS[i]}</td>
-        <td>${fmt(v)}</td>
-        <td>${sci(Math.abs(v-gc.x[i]))}</td>
-        <td>${sci(Math.abs(v-gcp.x[i]))}</td>
-      </tr>
-    `).join("");
+  for(let k=0;k<n;k++){
+    let pivot=k;
+    for(let i=k+1;i<n;i++)
+      if(Math.abs(C[i][k])>Math.abs(C[pivot][k]))pivot=i;
 
-    $("errorsOut").innerHTML = `
-      <div class="tablewrap">
-      <table>
-        <tr>
-          <th>Unidad</th>
-          <th>Referencia</th>
-          <th>Error GC</th>
-          <th>Error GCP</th>
-        </tr>
-        ${rows}
-      </table>
-      </div>
-      <div class="notice">
-        Número de condición de A:
-        <b>${sci(condition(A))}</b>
-        <br>
-        Número de condición precondicionado:
-        <b>${sci(preconditionedCondition(A,"jacobi"))}</b>
-      </div>
-    `;
+    if(Math.abs(C[pivot][k])<1e-14)
+      throw Error("Sistema singular o casi singular.");
 
-  } catch (err) {
-    $("errorsOut").innerHTML =
-      `<div class="error">${err.message}</div>`;
-  }
-});
+    [C[k],C[pivot]]=[C[pivot],C[k]];
 
-// COMPARACIÓN DE LOS TRES ESCENARIOS
-document.addEventListener("click", e => {
-  if (e.target.id !== "compareBtn") return;
-
-  try {
-    const oldA = A, oldB = b, oldX = x0;
-    const oldActive = active;
-    const rows = [];
-
-    for (const [key, s] of Object.entries(SCENARIOS)) {
-      A = clone(s.A);
-      b = s.b.slice();
-      x0 = Array(4).fill(0);
-
-      const exact = gauss(A,b);
-      const gc = cg(A,b,false);
-      const gcp = cg(A,b,true);
-
-      rows.push(`
-        <tr>
-          <td>${s.name}</td>
-          <td>${gc.it}</td>
-          <td>${gcp.it}</td>
-          <td>${sci(condition(A))}</td>
-          <td>${sci(relres(A,gcp.x,b))}</td>
-          <td>${gcp.ok ? "Converge" : "No converge"}</td>
-        </tr>
-      `);
-    }
-
-    A = oldA;
-    b = oldB;
-    x0 = oldX;
-    active = oldActive;
-
-    $("compareOut").innerHTML = `
-      <div class="tablewrap">
-      <table>
-        <tr>
-          <th>Escenario</th>
-          <th>Iteraciones GC</th>
-          <th>Iteraciones GCP</th>
-          <th>Condición</th>
-          <th>Residuo GCP</th>
-          <th>Estado</th>
-        </tr>
-        ${rows.join("")}
-      </table>
-      </div>
-    `;
-
-  } catch (err) {
-    $("compareOut").innerHTML =
-      `<div class="error">${err.message}</div>`;
-  }
-});
-
-// PRUEBAS DE CALIDAD QA
-document.addEventListener("click", e => {
-  if (e.target.id !== "qaBtn") return;
-
-  const tests = [];
-
-  function test(name, fn) {
-    try {
-      fn();
-      tests.push([name, "APROBADA"]);
-    } catch (err) {
-      tests.push([name, "FALLIDA: " + err.message]);
+    for(let i=k+1;i<n;i++){
+      const factor=C[i][k]/C[k][k];
+      for(let j=k;j<=n;j++)
+        C[i][j]-=factor*C[k][j];
     }
   }
 
-  test("Simetría de la matriz", () => {
-    if (!symmetry(A)) throw Error("No es simétrica");
+  const x=Array(n).fill(0);
+  for(let i=n-1;i>=0;i--){
+    let sum=C[i][n];
+    for(let j=i+1;j<n;j++)sum-=C[i][j]*x[j];
+    x[i]=sum/C[i][i];
+  }
+  return x;
+}
+
+function conditionEstimate(M){
+  const inverseColumns=[];
+  const n=M.length;
+
+  for(let j=0;j<n;j++){
+    const e=Array(n).fill(0);
+    e[j]=1;
+    inverseColumns.push(solveGauss(M,e));
+  }
+
+  const inv=inverseColumns[0].map((_,i)=>inverseColumns.map(col=>col[i]));
+
+  const normA=Math.max(...M.map(row=>row.reduce((s,v)=>s+Math.abs(v),0)));
+  const normInv=Math.max(...inv.map(row=>row.reduce((s,v)=>s+Math.abs(v),0)));
+
+  return normA*normInv;
+}
+
+function pcg(M,b,eps,maxIt){
+  const n=b.length;
+  let x=Array(n).fill(0);
+  let r=subtract(b,matVec(M,x));
+
+  const L=cholesky(M);
+  const LT=L[0].map((_,j)=>L.map(row=>row[j]));
+
+  let z=solveUpper(LT,solveLower(L,r));
+  let p=[...z];
+  let rz=dot(r,z);
+
+  const history=[];
+  const initialNorm=norm(r);
+
+  history.push({
+    iteration:0,
+    residual:initialNorm,
+    x:[...x]
   });
 
-  test("Definición positiva", () => cholesky(A));
+  if(initialNorm<=eps){
+    return {x,history,converged:true};
+  }
 
-  test("Solución por Gauss", () => {
-    const x = gauss(A,b);
-    if (relres(A,x,b) > 1e-8) throw Error("Residuo elevado");
-  });
+  for(let k=1;k<=maxIt;k++){
+    const Ap=matVec(M,p);
+    const denominator=dot(p,Ap);
 
-  test("Convergencia GCP", () => {
-    const x = cg(A,b,true);
-    if (!x.ok) throw Error("No converge");
-  });
+    if(denominator<=0)
+      throw Error("El método detectó una dirección no positiva.");
 
-  $("qaOut").innerHTML = `
-    <div class="tablewrap">
-    <table>
-      <tr><th>Prueba</th><th>Resultado</th></tr>
-      ${tests.map(t => `
-        <tr>
-          <td>${t[0]}</td>
-          <td class="${t[1]==="APROBADA"?"good":"bad"}">${t[1]}</td>
-        </tr>
+    const alpha=rz/denominator;
+    x=add(x,multiplyScalar(p,alpha));
+    r=subtract(r,multiplyScalar(Ap,alpha));
+
+    const residual=norm(r);
+    history.push({
+      iteration:k,
+      residual,
+      x:[...x]
+    });
+
+    if(residual<=eps){
+      return {x,history,converged:true};
+    }
+
+    z=solveUpper(LT,solveLower(L,r));
+
+    const rzNew=dot(r,z);
+    const beta=rzNew/rz;
+
+    p=add(z,multiplyScalar(p,beta));
+    rz=rzNew;
+  }
+
+  return {x,history,converged:false};
+}
+
+function matrixHTML(M){
+  return `<table><tbody>${M.map(row=>
+    `<tr>${row.map(v=>`<td>${Number(v).toFixed(5)}</td>`).join("")}</tr>`
+  ).join("")}</tbody></table>`;
+}
+
+function vectorHTML(v){
+  return `<table><tbody>${v.map((x,i)=>
+    `<tr><td>x${i+1}</td><td>${x.toFixed(8)}</td></tr>`
+  ).join("")}</tbody></table>`;
+}
+
+function title(t,sub){
+  return `<h2>${t}</h2><p>${sub}</p>`;
+}
+
+function card(t,content){
+  return `<section class="card"><h3>${t}</h3>${content}</section>`;
+}
+
+function metric(label,value,description){
+  return `<div class="stat"><span class="muted">${label}</span><strong>${value}</strong><span class="muted">${description}</span></div>`;
+}
+
+function runCalculation(){
+  if(!isSymmetric(A))
+    throw Error("La matriz debe ser simétrica.");
+  if(!isPositiveDefinite(A))
+    throw Error("La matriz debe ser definida positiva.");
+
+  const result=pcg(A,b,tolerance,maxIterations);
+  const exact=solveGauss(A,b);
+  const residual=subtract(matVec(A,result.x),b);
+  const error=norm(subtract(result.x,exact));
+
+  lastResult={
+    ...result,
+    exact,
+    residual,
+    error,
+    condition:conditionEstimate(A)
+  };
+
+  return lastResult;
+}
+
+function inicio(){
+  return title("Panel principal","Bienvenido al laboratorio interactivo de métodos numéricos.")
+  +`<div class="grid">
+    ${metric("Método principal","PCG","Gradientes conjugados precondicionado")}
+    ${metric("Dimensión","3 × 3","Sistema matricial de ejemplo")}
+    ${metric("Aplicación","Finanzas","Modelado de variables financieras")}
+    ${metric("Implementación","JavaScript","Compatible con GitHub Pages")}
+  </div>`
+  +card("Objetivo del proyecto",`
+    <p>Analizar la solución de sistemas de ecuaciones lineales mediante el método de
+    Gradientes Conjugados Precondicionado (PCG), utilizando escenarios que representan
+    situaciones financieras.</p>
+    <p>El portal permite ingresar datos, seleccionar escenarios, calcular soluciones,
+    estudiar errores y comparar resultados.</p>
+    <button class="action" onclick="navigate('caso')">Comenzar proyecto →</button>
+  `)
+  +card("Ruta de aprendizaje",`
+    <ol>
+      <li>Comprender el problema financiero.</li>
+      <li>Construir el modelo matricial Ax = b.</li>
+      <li>Introducir los datos del sistema.</li>
+      <li>Ejecutar el método PCG.</li>
+      <li>Analizar convergencia, error y resultados.</li>
+    </ol>
+  `);
+}
+
+function caso(){
+  return title("01. Caso de estudio","Aplicación de sistemas lineales en el análisis financiero.")
+  +card("Descripción del problema",`
+    <p>Una institución financiera necesita estimar simultáneamente tres variables
+    relacionadas con su operación. Cada variable puede representar una magnitud
+    financiera normalizada, como demanda de crédito, disponibilidad de liquidez
+    o presión de obligaciones.</p>
+    <p>Las variables interactúan entre sí. Por ello, el sistema se representa mediante
+    ecuaciones lineales que relacionan los valores desconocidos con los datos observados.</p>
+  `)
+  +card("Planteamiento",`
+    <p>Se desea resolver un sistema de la forma:</p>
+    <div class="result"><h3>A · x = b</h3>
+    <p>A: matriz de coeficientes.</p>
+    <p>x: vector de variables desconocidas.</p>
+    <p>b: vector de valores conocidos.</p></div>
+    <p>El propósito es encontrar los valores de x que satisfacen simultáneamente
+    todas las ecuaciones.</p>
+  `)
+  +card("Importancia",`
+    <ul>
+      <li>Permite modelar relaciones entre variables.</li>
+      <li>Facilita la simulación de escenarios.</li>
+      <li>Ayuda a estudiar la estabilidad de los cálculos.</li>
+      <li>Permite comparar métodos directos e iterativos.</li>
+    </ul>
+  `);
+}
+
+function modelo(){
+  return title("02. Modelo matemático","Representación matricial y fundamentos del método.")
+  +card("Sistema de ecuaciones",`
+    <p>El sistema general para tres incógnitas es:</p>
+    <div class="result">
+      a11x1 + a12x2 + a13x3 = b1<br>
+      a21x1 + a22x2 + a23x3 = b2<br>
+      a31x1 + a32x2 + a33x3 = b3
+    </div>
+    <p>En forma matricial:</p>
+    <h3>A · x = b</h3>
+  `)
+  +card("Condiciones para PCG",`
+    <p>El método de Gradientes Conjugados Precondicionado requiere que la matriz
+    sea simétrica y definida positiva.</p>
+    <ul>
+      <li><b>Simétrica:</b> A = Aᵀ.</li>
+      <li><b>Definida positiva:</b> xᵀAx es positivo para todo vector x no nulo.</li>
+      <li><b>Precondicionamiento:</b> se utiliza una matriz auxiliar para mejorar
+      el comportamiento de la iteración.</li>
+    </ul>
+    <p>En este proyecto se utiliza un precondicionador de tipo Cholesky:
+    M = LLᵀ.</p>
+  `)
+  +card("Criterio de parada",`
+    <p>El algoritmo evalúa la norma del residuo:</p>
+    <div class="result">r = b - Ax</div>
+    <p>Se detiene cuando:</p>
+    <div class="result">||r|| ≤ tolerancia</div>
+  `);
+}
+
+function datos(){
+  return title("03. Ingreso de datos","Introduce una matriz simétrica definida positiva y el vector independiente.")
+  +card("Matriz de coeficientes",`
+    <p class="muted">Ingresa los valores de la matriz A (3 × 3).</p>
+    <div class="formgrid">
+      ${A.map((row,i)=>row.map((v,j)=>`
+        <div><label>A${i+1}${j+1}</label>
+        <input id="a${i}${j}" type="number" step="any" value="${v}"></div>
+      `).join("")).join("")}
+    </div>
+  `)
+  +card("Vector independiente",`
+    <div class="formgrid">
+      ${b.map((v,i)=>`
+        <div><label>b${i+1}</label>
+        <input id="b${i}" type="number" step="any" value="${v}"></div>
       `).join("")}
+    </div>
+    <div class="formgrid">
+      <div><label>Tolerancia</label>
+      <input id="tol" type="number" step="any" value="${tolerance}"></div>
+      <div><label>Máximo de iteraciones</label>
+      <input id="maxit" type="number" min="1" max="10000" value="${maxIterations}"></div>
+    </div>
+    <button class="action" onclick="saveData()">Guardar datos</button>
+    <button class="action secondary" onclick="loadScenario('ideal')">Restaurar ejemplo</button>
+    <div id="dataMessage"></div>
+  `);
+}
+
+function saveData(){
+  try{
+    const newA=A.map((row,i)=>row.map((_,j)=>{
+      const value=Number($(`a${i}${j}`).value);
+      if(!Number.isFinite(value))throw Error("Completa todos los valores de A.");
+      return value;
+    }));
+
+    const newB=b.map((_,i)=>{
+      const value=Number($(`b${i}`).value);
+      if(!Number.isFinite(value))throw Error("Completa todos los valores de b.");
+      return value;
+    });
+
+    const newTolerance=Number($("tol").value);
+    const newMax=Number($("maxit").value);
+
+    if(!Number.isFinite(newTolerance)||newTolerance<=0)
+      throw Error("La tolerancia debe ser mayor que cero.");
+
+    if(!Number.isInteger(newMax)||newMax<1||newMax>10000)
+      throw Error("El máximo de iteraciones debe estar entre 1 y 10000.");
+
+    if(!isSymmetric(newA))
+      throw Error("La matriz A debe ser simétrica.");
+
+    if(!isPositiveDefinite(newA))
+      throw Error("La matriz A debe ser definida positiva.");
+
+    A=newA;
+    b=newB;
+    tolerance=newTolerance;
+    maxIterations=newMax;
+    lastResult=null;
+
+    $("dataMessage").innerHTML=
+      `<p class="good">✓ Datos guardados correctamente. Ya puedes ejecutar el método.</p>`;
+  }catch(e){
+    $("dataMessage").innerHTML=`<p class="bad">${e.message}</p>`;
+  }
+}
+
+function loadScenario(name){
+  selectedScenario=name;
+  A=JSON.parse(JSON.stringify(scenarios[name].A));
+  b=[...scenarios[name].b];
+  lastResult=null;
+  navigate("escenarios");
+}
+
+function escenarios(){
+  return title("04. Escenarios financieros","Selecciona un contexto para estudiar el comportamiento del algoritmo.")
+  +`<div class="grid">
+    <div class="card">
+      <h3>Escenario 1: Estable</h3>
+      <p>${scenarios.ideal.description}</p>
+      <button class="action" onclick="loadScenario('ideal')">Cargar escenario</button>
+    </div>
+    <div class="card">
+      <h3>Escenario 2: Estrés</h3>
+      <p>${scenarios.stress.description}</p>
+      <button class="action" onclick="loadScenario('stress')">Cargar escenario</button>
+    </div>
+    <div class="card">
+      <h3>Escenario 3: Mal condicionado</h3>
+      <p>${scenarios.difficult.description}</p>
+      <button class="action" onclick="loadScenario('difficult')">Cargar escenario</button>
+    </div>
+  </div>`
+  +card("Escenario actualmente seleccionado",`
+    <p><b>${scenarios[selectedScenario].name}</b></p>
+    <p>${scenarios[selectedScenario].description}</p>
+    <h3>Matriz A</h3>${matrixHTML(A)}
+    <h3>Vector b</h3>${vectorHTML(b)}
+    <button class="action" onclick="navigate('metodos')">Ejecutar método PCG →</button>
+  `);
+}
+
+function metodos(){
+  let result;
+  try{
+    result=runCalculation();
+  }catch(e){
+    return title("05. Métodos numéricos","Ejecución del algoritmo PCG.")
+      +card("No se pudo ejecutar",`<p class="bad">${e.message}</p>`);
+  }
+
+  const rows=result.history.map(h=>`
+    <tr>
+      <td>${h.iteration}</td>
+      <td>${h.residual.toExponential(6)}</td>
+      ${h.x.map(v=>`<td>${v.toFixed(8)}</td>`).join("")}
+    </tr>
+  `).join("");
+
+  return title("05. Métodos numéricos","Ejecución del método de Gradientes Conjugados Precondicionado.")
+  +`<div class="grid">
+    ${metric("Iteraciones",result.history.length-1,"Iteraciones realizadas")}
+    ${metric("Residuo final",result.history.at(-1).residual.toExponential(3),"Norma del residuo")}
+    ${metric("Condición estimada",result.condition.toFixed(3),"Número de condición")}
+    ${metric("Convergencia",result.converged?"Sí":"No",result.converged?"Criterio alcanzado":"Límite de iteraciones")}
+  </div>`
+  +card("Resultado aproximado",vectorHTML(result.x))
+  +card("Solución de referencia (Gauss)",vectorHTML(result.exact))
+  +card("Historial de iteraciones",`
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Iteración</th><th>Residuo</th><th>x1</th><th>x2</th><th>x3</th></tr></thead>
+      <tbody>${rows}</tbody>
     </table>
     </div>
-    <div class="${tests.every(t=>t[1]==="APROBADA")?"success":"error"}">
-      ${tests.filter(t=>t[1]==="APROBADA").length}
-      de ${tests.length} pruebas aprobadas.
-    </div>
-  `;
+  `)
+  +card("Interpretación",`
+    <p class="${result.converged?"good":"warn"}">
+      ${result.converged
+        ?"El método alcanzó la tolerancia establecida."
+        :"El método no alcanzó la tolerancia dentro del máximo de iteraciones."}
+    </p>
+    <p>La solución aproximada se obtiene mediante actualizaciones sucesivas
+    del vector x, utilizando direcciones conjugadas y el precondicionador de Cholesky.</p>
+  `);
+}
+
+function errores(){
+  let result;
+  try{result=lastResult||runCalculation();}
+  catch(e){return title("06. Análisis de errores","Estudio del error numérico.")
+    +card("Error",`<p class="bad">${e.message}</p>`);}
+
+  const rnorm=norm(result.residual);
+  const relative=result.error/(norm(result.exact)||1);
+
+  return title("06. Análisis de errores","Evaluación de la precisión y estabilidad de la solución.")
+  +`<div class="grid">
+    ${metric("Error absoluto",result.error.toExponential(5),"Diferencia entre PCG y Gauss")}
+    ${metric("Error relativo",relative.toExponential(5),"Error absoluto / norma de referencia")}
+    ${metric("Residuo",rnorm.toExponential(5),"Norma de Ax - b")}
+    ${metric("Condición",result.condition.toFixed(4),"Estimación de sensibilidad")}
+  </div>`
+  +card("Definición del residuo",`
+    <div class="result">r = Ax - b</div>
+    <p>El residuo permite comprobar qué tan bien satisface la solución aproximada
+    las ecuaciones originales.</p>
+  `)
+  +card("Error absoluto",`
+    <div class="result">Error = ||x PCG - x referencia||₂</div>
+    <p>Compara la solución obtenida por PCG con la solución calculada mediante
+    eliminación de Gauss.</p>
+  `)
+  +card("Interpretación",`
+    <p>Un residuo pequeño indica que la solución aproximada satisface el sistema
+    con mayor precisión. Un número de condición elevado indica mayor sensibilidad
+    ante pequeñas variaciones en los datos.</p>
+  `);
+}
+
+function comparativa(){
+  const names=["Estable","Estrés","Mal condicionado"];
+  const keys=["ideal","stress","difficult"];
+  const results=[];
+
+  for(let i=0;i<keys.length;i++){
+    try{
+      const s=scenarios[keys[i]];
+      const r=pcg(s.A,s.b,tolerance,maxIterations);
+      results.push({
+        name:names[i],
+        iterations:r.history.length-1,
+        residual:r.history.at(-1).residual,
+        converged:r.converged,
+        condition:conditionEstimate(s.A)
+      });
+    }catch(e){
+      results.push({
+        name:names[i],
+        iterations:0,
+        residual:NaN,
+        converged:false,
+        condition:NaN
+      });
+    }
+  }
+
+  const max=Math.max(1,...results.map(r=>r.iterations));
+
+  return title("07. Comparativa de escenarios","Comparación de convergencia y comportamiento numérico.")
+  +card("Tabla comparativa",`
+    <table>
+      <thead>
+        <tr><th>Escenario</th><th>Iteraciones</th><th>Residuo final</th><th>Condición</th><th>Estado</th></tr>
+      </thead>
+      <tbody>
+        ${results.map(r=>`
+          <tr>
+            <td>${r.name}</td>
+            <td>${r.iterations}</td>
+            <td>${Number.isFinite(r.residual)?r.residual.toExponential(3):"Error"}</td>
+            <td>${Number.isFinite(r.condition)?r.condition.toFixed(3):"Error"}</td>
+            <td class="${r.converged?"good":"warn"}">${r.converged?"Convergió":"No convergió"}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `)
+  +card("Comparación visual de iteraciones",`
+    ${results.map(r=>`
+      <div class="barrow">
+        <span>${r.name}</span>
+        <div class="bar"><span style="width:${100*r.iterations/max}%"></span></div>
+        <b>${r.iterations}</b>
+      </div>
+    `).join("")}
+    <p class="muted">Las barras representan la cantidad de iteraciones utilizadas.
+    Una menor cantidad no implica por sí sola mayor precisión: también debe revisarse el residuo.</p>
+  `);
+}
+
+function qa(){
+  const tests=[];
+  function test(name,fn){
+    try{
+      const ok=fn();
+      tests.push({name,ok:!!ok,detail:ok?"Prueba superada":"No se cumplió la condición"});
+    }catch(e){
+      tests.push({name,ok:false,detail:e.message});
+    }
+  }
+
+  test("Matriz simétrica",()=>isSymmetric(A));
+  test("Matriz definida positiva",()=>isPositiveDefinite(A));
+  test("Dimensión de matriz",()=>A.length===3&&A.every(r=>r.length===3));
+  test("Dimensión del vector",()=>b.length===3);
+  test("Solución de referencia",()=>{
+    const x=solveGauss(A,b);
+    return norm(subtract(matVec(A,x),b))<1e-8;
+  });
+  test("Factorización Cholesky",()=>{
+    const L=cholesky(A);
+    const reconstructed=L.map((row,i)=>L.map((_,j)=>
+      row.slice(0,3).reduce((s,v,k)=>s+v*L[j][k],0)
+    ));
+    const error=reconstructed.flat().reduce((s,v,i)=>
+      s+Math.abs(v-A.flat()[i]),0);
+    return error<1e-8;
+  });
+  test("Convergencia PCG",()=>{
+    const r=pcg(A,b,tolerance,maxIterations);
+    return r.converged;
+  });
+
+  return title("08. Validación y control de calidad","Pruebas automáticas de consistencia del modelo.")
+  +card("Resultados de validación",`
+    <table>
+      <thead><tr><th>Prueba</th><th>Resultado</th><th>Detalle</th></tr></thead>
+      <tbody>
+        ${tests.map(t=>`
+          <tr>
+            <td>${t.name}</td>
+            <td class="${t.ok?"good":"bad"}">${t.ok?"✓ Correcto":"✗ Falló"}</td>
+            <td>${t.detail}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+    <h3>${tests.filter(t=>t.ok).length} de ${tests.length} pruebas superadas</h3>
+  `)
+  +card("Criterios de calidad",`
+    <ul>
+      <li>Validación de dimensiones y datos numéricos.</li>
+      <li>Simetría de la matriz.</li>
+      <li>Definición positiva mediante Cholesky.</li>
+      <li>Verificación de la solución por residuo.</li>
+      <li>Control de tolerancia e iteraciones.</li>
+    </ul>
+  `);
+}
+
+function conclusiones(){
+  return title("09. Conclusiones","Síntesis de los resultados y aportes del proyecto.")
+  +card("Conclusiones",`
+    <ol>
+      <li>Los sistemas lineales permiten representar relaciones entre diferentes
+      variables de un modelo financiero.</li>
+      <li>El método PCG combina gradientes conjugados con un precondicionador
+      para mejorar el proceso de solución.</li>
+      <li>La matriz debe ser simétrica y definida positiva para aplicar correctamente
+      el algoritmo utilizado.</li>
+      <li>La evaluación del residuo y del error permite verificar la calidad
+      de los resultados obtenidos.</li>
+      <li>Los escenarios permiten observar cómo las características de la matriz
+      influyen en el comportamiento numérico.</li>
+    </ol>
+  `)
+  +card("Aplicación en Ingeniería en Sistemas",`
+    <p>Este tipo de métodos puede utilizarse en simulación, optimización,
+    análisis de redes, modelos de recursos y sistemas de gran dimensión.
+    En aplicaciones reales, el precondicionamiento resulta especialmente importante
+    cuando resolver sistemas lineales directamente tiene un costo computacional elevado.</p>
+  `)
+  +card("Recomendaciones",`
+    <ul>
+      <li>Verificar siempre las propiedades de la matriz.</li>
+      <li>Elegir una tolerancia adecuada al problema.</li>
+      <li>Comparar los resultados con un método de referencia.</li>
+      <li>Analizar tanto el residuo como el número de condición.</li>
+      <li>Ampliar el experimento a matrices de mayor dimensión.</li>
+    </ul>
+  `)
+  +card("Fin del proyecto",`
+    <h3 class="good">✓ Proyecto completado</h3>
+    <p>El portal permite experimentar con el método PCG y comprender su aplicación
+    en problemas representados mediante sistemas de ecuaciones lineales.</p>
+    <button class="action" onclick="navigate('inicio')">Volver al inicio</button>
+  `);
+}
+
+function navigate(page){
+  currentPage=page;
+  document.querySelectorAll("#menu button").forEach(button=>{
+    button.classList.toggle("active",button.dataset.page===page);
+  });
+
+  const pages={
+    inicio,
+    caso,
+    modelo,
+    datos,
+    escenarios,
+    metodos,
+    errores,
+    comparativa,
+    qa,
+    conclusiones
+  };
+
+  $("app").innerHTML=pages[page]();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.querySelectorAll("#menu button").forEach(button=>{
+  button.addEventListener("click",()=>{
+    navigate(button.dataset.page);
+  });
 });
 
-// INICIALIZACIÓN
 navigate("inicio");
-
 </script>
+
 </body>
 </html>
